@@ -38,7 +38,7 @@ class Image
 
     /**
      * @Assert\File(
-     *     mimeTypes = {"image/jpeg"},
+     *     mimeTypes = {"image/png"},
      *     mimeTypesMessage = "Please upload a valid image"
      * )
      */

@@ -36,6 +36,8 @@ class UserController extends Controller
         $allUser = $user->findAll();
         $serializer = $this->get('jms_serializer');
         $response['body'] = $allUser;//$array;
+        $response['status'] = true;
+        $response['error'] = [];
         $res = new Response($serializer->serialize($response,'json'));
         $res->headers->set('Content-Type', 'application/json');
         $res->headers->set('Access-Control-Allow-origin','*');
@@ -53,6 +55,7 @@ class UserController extends Controller
 
         //get file from request
         $file = $request->files->get('file');
+        $serializer = $this->get('jms_serializer');
 
 
 
@@ -68,8 +71,16 @@ class UserController extends Controller
              * ConstraintViolationList object. This gives us a nice string
              * for debugging.
              */
-            $errorsString = (string) $errors;
-            return new Response($errorsString);
+            $errorMessage = [];
+            foreach ($errors as $error) {
+                $errorMessage[$error->getPropertyPath()] =  $error->getMessage();
+            }
+
+            $response['body'] = [];
+            $response['status'] = false;
+            $response['error'] = $errorMessage;
+
+            return new Response($serializer->serialize($response,'json'));
             die();
         }
 
@@ -90,7 +101,7 @@ class UserController extends Controller
 
         //response to API
         $response = array();
-        $serializer = $this->get('jms_serializer');
+        //$serializer = $this->get('jms_serializer');
 
         //NEED VALIDATE FORM DATA IN FUTURE
 
@@ -159,6 +170,8 @@ class UserController extends Controller
         // $serializer = $serializer::create()->build();
         $array = $serializer->toArray($last_object);
         $response['body'] = $array;
+        $response['status'] = true;
+        $response['error'] = [];
 
         return new Response($serializer->serialize($response,'json'));
         die();
