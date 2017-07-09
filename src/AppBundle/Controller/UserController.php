@@ -140,7 +140,7 @@ class UserController extends Controller
         // $image->setPath($form_data['file_path']);
         $image->setPath($request->getScheme() . '://' . $request->getHttpHost().'/upload/'.$fileName);
         $address->setAddress($formData['address']);
-        $pwd=$user->getPassword();
+        $pwd= 111111; //$user->getPassword()
         $encoder=$this->container->get('security.password_encoder');
         $pwd=$encoder->encodePassword($user, $pwd);
         $user->setPassword($pwd);
@@ -202,5 +202,32 @@ class UserController extends Controller
         $response = new BinaryFileResponse($file);
         // you can modify headers here, before returning
         return $response;
+    }
+
+    /**
+     * @Route("/login", name="login_user")
+     * @Method({"POST"})
+     */
+    public function loginAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $serializer = $this->get('jms_serializer');
+        $formData = $request->request->all();
+
+        $user = new User();
+        $encoder=$this->container->get('security.password_encoder');
+        $pwd=$encoder->encodePassword($user, $formData['password']);
+        $repository = $this->getDoctrine()->getRepository('AppBundle:User');
+        $user = $repository->findOneBy(
+            array('email' => $formData['email'], 'password' => $pwd) 
+        );
+      //  $data = $serializer->toArray($user);
+        $response['body'] = $user;
+        $response['status'] = true;
+        $response['error'] = [];
+
+
+        return new Response($serializer->serialize($response,'json'));
+        die();
     }
 }
