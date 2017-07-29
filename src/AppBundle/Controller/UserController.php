@@ -20,6 +20,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Validator\Constraints\Url;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserController extends Controller
 {
@@ -221,13 +222,15 @@ class UserController extends Controller
         $user = $repository->findOneBy(
             array('email' => $formData['email'], 'password' => $pwd) 
         );
-      //  $data = $serializer->toArray($user);
-        $response['body'] = $user;
-        $response['status'] = true;
-        $response['error'] = [];
-
-
+        if($user) {
+            $response['body'] = $serializer->toArray($user);
+            $response['status'] = true;
+            $response['error'] = [];
+        } else {
+            $response['body'] = '';
+            $response['status'] = false;
+            $response['error'] = ['User do not exist'];
+        }
         return new Response($serializer->serialize($response,'json'));
-        die();
     }
 }

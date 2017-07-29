@@ -9,8 +9,10 @@ use Doctrine\ORM\EntityRepository;
 
 class UserRepository extends EntityRepository implements UserLoaderInterface
 {
+    
     public function loadUserByUsername($username)
     {
+        /*
         return $this->createQueryBuilder('u')
             ->select('u, g')            // for user permision group (Entity Group)
             ->leftJoin('u.groups', 'g') // for user permission group (Entity Group)
@@ -19,7 +21,9 @@ class UserRepository extends EntityRepository implements UserLoaderInterface
             ->setParameter('email', $username)
             ->getQuery()
             ->getOneOrNullResult();
+        */
     }
+    
 
     //rewrite doctrine method with sort parameter
     public function findAll()
