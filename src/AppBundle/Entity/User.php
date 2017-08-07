@@ -124,6 +124,16 @@ class User implements  AdvancedUserInterface , \Serializable
      * @JMS\Expose
      */
     private $image;
+
+    /**
+     *  @ORM\OneToMany(targetEntity="MessageDetails", mappedBy="user")
+     *
+     *
+     */
+    public $messageDetails;
+    
+    
+    
     public function eraseCredentials()
     {
     }
