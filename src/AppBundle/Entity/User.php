@@ -126,11 +126,18 @@ class User implements  AdvancedUserInterface , \Serializable
     private $image;
 
     /**
-     *  @ORM\OneToMany(targetEntity="MessageDetails", mappedBy="user")
+     *  @ORM\OneToMany(targetEntity="Message", mappedBy="user")
      *
      *
      */
-    public $messageDetails;
+    public $message;
+
+    /**
+     *  @ORM\OneToMany(targetEntity="MessageTo", mappedBy="user")
+     *
+     *
+     */
+    public $messageTo;
     
     
     

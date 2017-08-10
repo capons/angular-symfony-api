@@ -3,18 +3,24 @@ namespace AppBundle\Entity;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 use JMS\Serializer\Annotation as JMS;
 
 //Exclusion -> display only fields with this tag -> @JMS\Expose
 /**
  * User
  * @JMS\ExclusionPolicy("all")
- * @ORM\Table(name="message",options={"collate"="utf8_general_ci"})
+ * @ORM\Table(name="message_to",options={"collate"="utf8_general_ci"})
  * @ORM\Entity()
  */
-class Message
+class MessageTo
 {
 
+    public function __construct()
+    {
+        $this->messageDetailsGroup = new ArrayCollection();
+    }
     /**
      * @ORM\Column(type="integer")
      * @ORM\Id
@@ -46,7 +52,7 @@ class Message
      * @JMS\Expose
      */
     private $userMessage;
-    
+
     //related with entity User
     /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="users")
@@ -54,13 +60,6 @@ class Message
      * @JMS\Expose
      */
     private $user;
-
-    /**
-     *  @ORM\OneToMany(targetEntity="MessageTo", mappedBy="user")
-     *
-     *
-     */
-    public $messageTo;
 
     public function setUser(\AppBundle\Entity\User $user)
     {
@@ -72,7 +71,26 @@ class Message
     {
         return $this->user;
     }
-    
+
+    //related with entity Message
+    /**
+     * @ORM\ManyToOne(targetEntity="Message", inversedBy="message")
+     * @ORM\JoinColumn(name="message_id", referencedColumnName="id")
+     * @JMS\Expose
+     */
+    private $message;
+
+    public function setMessageTo(\AppBundle\Entity\Message $message)
+    {
+        $this->message = $message;
+        return $this->message;
+    }
+
+    public function getMessageTo()
+    {
+        return $this->message;
+    }
+
     /**
      * @return mixed
      */
