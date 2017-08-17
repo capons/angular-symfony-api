@@ -46,33 +46,7 @@ class Message
      * @JMS\Expose
      */
     private $userMessage;
-    
-    //related with entity User
-    /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="users")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
-     * @JMS\Expose
-     */
-    private $user;
 
-    /**
-     *  @ORM\OneToMany(targetEntity="MessageTo", mappedBy="user")
-     *
-     *
-     */
-    public $messageTo;
-
-    public function setUser(\AppBundle\Entity\User $user)
-    {
-        $this->user = $user;
-        return $this->user;
-    }
-
-    public function getUser()
-    {
-        return $this->user;
-    }
-    
     /**
      * @return mixed
      */
@@ -88,5 +62,43 @@ class Message
     {
         $this->userMessage = $message;
         return $this->userMessage;
+    }
+    
+    //related with entity User
+    /**
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="users")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     * @JMS\Expose
+     */
+    private $user;
+
+    public function setUser(\AppBundle\Entity\User $user)
+    {
+        $this->user = $user;
+        return $this->user;
+    }
+
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    //related with entity User
+    /**
+     * @ORM\ManyToOne(targetEntity="MessageGroup", inversedBy="message_group")
+     * @ORM\JoinColumn(name="message_group_id", referencedColumnName="id")
+     * @JMS\Expose
+     */
+    private $messageGroup;
+
+    public function setMessageGroup(\AppBundle\Entity\MessageGroup $messageGroup)
+    {
+        $this->messageGroup = $messageGroup;
+        return $this->messageGroup;
+    }
+
+    public function getMessageGroup()
+    {
+        return $this->messageGroup;
     }
 }

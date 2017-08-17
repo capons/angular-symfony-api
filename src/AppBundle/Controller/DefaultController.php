@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Message;
 use AppBundle\Entity\MessageDetails;
+use AppBundle\Entity\MessageGroup;
 use AppBundle\Entity\MessageTo;
 use AppBundle\Entity\User;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -19,35 +20,92 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
-       
+        //add chat private message
+        $messageGroupRepository = $this->getDoctrine()->getRepository(MessageGroup::class);
+        $qb =$messageGroupRepository->createQueryBuilder('m');
+        $to = 23;
+        $from = 24;
+        $userMessage = 'dsfdsfsdfdsfds';
+        //select group
+        $messageGroup = $qb->select  ('m')
+            ->from    ('AppBundle\Entity\MessageGroup', 'f')
+            ->where   ('m.userFrom = :to and m.userTo = :from')
+            ->orWhere('m.userFrom = :from and m.userTo = :to')
+            ->setParameters(['to' => $to, 'from' => $from])
+            ->getQuery()
+            ->getOneOrNullResult();
 
-            
-        /*
-        $userRepository = $this->getDoctrine()->getRepository(User::class);
-        $user = $userRepository->find(23);
-        $message = new Message();
-        $messageTo = new MessageTo();
-        $message->setMessage('ohhhhh hellooooo');
-        $message->setUser($user);
-        $message->setTime();
 
-        $userTo = $userRepository->find(24);
-        //response to message
-        $messageTo->setUser($userTo);
-        $messageTo->setMessage('heeeee');
-        $messageTo->setMessageTo($message);
-        $messageTo->setTime();
+        if($messageGroup) {
+            $userRepository = $this->getDoctrine()->getRepository(User::class);
+            $user = $userRepository->find($from);
+            $message = new Message();
+            $message->setMessage($userMessage);
+            $message->setUser($user);
+            $message->setTime();
+            //response to message
+            $message->setMessageGroup($messageGroup);
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($message);
+            $em->flush();
+        } else {
+            $userRepository = $this->getDoctrine()->getRepository(User::class);
+            $user = $userRepository->find($to);
+            $message = new Message();
+            $messageGroup = new MessageGroup();
+            $message->setMessage('fdsfdsfsdfsf');
+            $message->setUser($user);
+            $message->setTime();
+            $userTo = $userRepository->find($from);
+            //response to message
+            $messageGroup->setUserFrom($user);
+            $messageGroup->setUserTo($userTo);
+            $message->setMessageGroup($messageGroup);
+
+        }
 
         $em = $this->getDoctrine()->getManager();
         $em->persist($message);
-        $em->persist($messageTo);
+        $em->persist($messageGroup);
         $em->flush();
 
+
+
+
+
+
+
+        $mGroup = $qb->select  ('m')
+            ->from    ('AppBundle\Entity\MessageGroup', 'd')
+            ->where   ('m.userFrom = :to and m.userTo = :from')
+            ->orWhere('m.userFrom = :from and m.userTo = :to')
+            ->setParameters(['to' => $to, 'from' => $from])
+            ->getQuery()
+            ->getOneOrNullResult();
+        if($mGroup) {
+            //select private message
+            $em = $this->getDoctrine()->getManager();
+            $entity = $em
+                ->getRepository('AppBundle:Message')
+                ->createQueryBuilder('e')
+                ->where('e.messageGroup = :groupId')
+                ->setParameter('groupId', $mGroup->getId())
+                ->getQuery()
+                ->getResult();
+            $serializer = $this->get('jms_serializer');
+            $t = $serializer->serialize($entity, 'json');
+            $resultArray = json_decode($t, true);
+        }
+        $i = 1;
+        foreach ($resultArray as $k) {
+            print_r($i.' '.$k['user_message']);
+            echo '<br>';
+            $i++;
+        }
+
+
         die();
-        */
-
-
-        
 
 
 
@@ -77,6 +135,11 @@ class DefaultController extends Controller
             ->getQuery()
             ->getResult();
         */
+        //inner join message_group ON  message_group.user_from = message.user_id and message_group.user_to = message_to.user_id 
+
+
+        /*
+
         $entity = $em->createQuery(
         'SELECT m.userMessage as from_user, mm.userMessage as to_user
                 FROM AppBundle:Message m
@@ -106,6 +169,7 @@ class DefaultController extends Controller
         print_r(json_decode($t, true));
         echo '</pre>';
         die();
+        */
 
 
 

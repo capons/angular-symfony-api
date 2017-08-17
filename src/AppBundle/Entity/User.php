@@ -133,11 +133,18 @@ class User implements  AdvancedUserInterface , \Serializable
     public $message;
 
     /**
-     *  @ORM\OneToMany(targetEntity="MessageTo", mappedBy="user")
+     *  @ORM\OneToMany(targetEntity="MessageGroup", mappedBy="user")
      *
      *
      */
-    public $messageTo;
+    public $messageGroupTo;
+
+    /**
+     *  @ORM\OneToMany(targetEntity="MessageGroup", mappedBy="user")
+     *
+     *
+     */
+    public $messageGroupFrom;
     
     
     
