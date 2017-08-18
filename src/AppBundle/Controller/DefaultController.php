@@ -44,7 +44,7 @@ class DefaultController extends Controller
             $message->setUser($user);
             $message->setTime();
             //response to message
-            $message->setMessageGroup($messageGroup);
+          //  $message->setMessageGroup($messageGroup);
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($message);
@@ -54,14 +54,14 @@ class DefaultController extends Controller
             $user = $userRepository->find($to);
             $message = new Message();
             $messageGroup = new MessageGroup();
-            $message->setMessage('fdsfdsfsdfsf');
+            $message->setMessage('ffffffffffffffffff');
             $message->setUser($user);
             $message->setTime();
             $userTo = $userRepository->find($from);
             //response to message
             $messageGroup->setUserFrom($user);
             $messageGroup->setUserTo($userTo);
-            $message->setMessageGroup($messageGroup);
+          //  $message->setMessageGroup($messageGroup);
 
         }
 
