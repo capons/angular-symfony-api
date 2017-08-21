@@ -22,10 +22,16 @@ class Message
      * @JMS\Expose
      */
     public $id;
+    
+    public function getId()
+    {
+        return $this->id;
+    }
 
     /**
      * @var \DateTime
      * @ORM\Column(type="datetime")
+     * @JMS\Expose
      */
     private $created;
 
@@ -34,6 +40,8 @@ class Message
     {
         $this->created =  new \DateTime("now");
     }
+
+   
     
     /**
      * @ORM\Column(type="string", length=25)

@@ -44,21 +44,13 @@ class ApiExceptionJson implements EventSubscriberInterface
     {
         return $this->apiProblem;
     }
-
+    
     public function onKernelRequest(GetResponseEvent $event) {
         // Don't do anything if it's not the master request.
 
         if (!$event->isMasterRequest()) {
             return;
         }
-        $request = $event->getRequest();
-        $method  = $request->getRealMethod();
-        if ('OPTIONS' == $method) {
-            $response = new Response();
-            $event->setResponse($response);
-        }
-
-
     }
 
     public function onKernelResponse(FilterResponseEvent $event) {
@@ -67,11 +59,6 @@ class ApiExceptionJson implements EventSubscriberInterface
         if (!$event->isMasterRequest()) {
             return;
         }
-
-        $response = $event->getResponse();
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-        $response->headers->set('Access-Control-Allow-Headers', 'X-Header-One,X-Header-Two');
-
     }
+
 }

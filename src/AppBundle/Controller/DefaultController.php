@@ -99,7 +99,7 @@ class DefaultController extends Controller
         }
         $i = 1;
         foreach ($resultArray as $k) {
-            print_r($i.' '.$k['user_message']);
+            print_r(strtotime($k['created']));
             echo '<br>';
             $i++;
         }
