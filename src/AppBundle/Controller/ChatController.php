@@ -23,7 +23,7 @@ class ChatController extends Controller
     {
         // $formData = $request->request->all();
         $to = 23;
-        $from = 24;
+        $from = 17;
         $messageGroupRepository = $this->getDoctrine()->getRepository(MessageGroup::class);
         $qb =$messageGroupRepository->createQueryBuilder('m');
         //select private message
@@ -62,12 +62,10 @@ class ChatController extends Controller
             $chatMessageJson = $serializer->serialize($chatPublicMessageEntity, 'json');
             $message = json_decode($chatMessageJson, true);
             $response['body'] = $message;
-            $response['status'] = true;
             $response['error'] = [];
             return new Response($serializer->serialize($response,'json'), 200);
         } else {
             $response['body'] = [];
-            $response['status'] = true;
             $response['error'] = [];
             return new Response($serializer->serialize($response,'json'), 404);
         }
@@ -95,7 +93,7 @@ class ChatController extends Controller
         $messageGroupRepository = $this->getDoctrine()->getRepository(MessageGroup::class);
         $qb =$messageGroupRepository->createQueryBuilder('m');
         $to = 23;
-        $from = 244435;
+        $from = 17;
         $userMessage = $params['message'];
         //select group
         $messageGroup = $qb->select  ('m')
@@ -110,7 +108,7 @@ class ChatController extends Controller
         if($messageGroup) {
             $userRepository = $this->getDoctrine()->getRepository(User::class);
             $user = $userRepository->find($from);
-            $userTo = $userRepository->find($from);
+            $userTo = $userRepository->find($to);
             $message = new Message();
             $message->setMessage($userMessage);
             $message->setUser($user);
@@ -128,7 +126,7 @@ class ChatController extends Controller
             $em->flush();
         } else {
             $userRepository = $this->getDoctrine()->getRepository(User::class);
-            $user = $userRepository->find($to);
+            $user = $userRepository->find($from);
             $message = new Message();
             $message->setMessage($userMessage);
             $message->setUser($user);

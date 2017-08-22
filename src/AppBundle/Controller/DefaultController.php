@@ -20,11 +20,14 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
+
+
+        /*
         //add chat private message
         $messageGroupRepository = $this->getDoctrine()->getRepository(MessageGroup::class);
         $qb =$messageGroupRepository->createQueryBuilder('m');
         $to = 23;
-        $from = 24;
+        $from = 17;
         $userMessage = 'dsfdsfsdfdsfds';
         //select group
         $messageGroup = $qb->select  ('m')
@@ -51,23 +54,23 @@ class DefaultController extends Controller
             $em->flush();
         } else {
             $userRepository = $this->getDoctrine()->getRepository(User::class);
-            $user = $userRepository->find($to);
+            $user = $userRepository->find($from);
             $message = new Message();
             $messageGroup = new MessageGroup();
             $message->setMessage('ffffffffffffffffff');
             $message->setUser($user);
             $message->setTime();
-            $userTo = $userRepository->find($from);
+        //    $userTo = $userRepository->find($to);
             //response to message
             $messageGroup->setUserFrom($user);
-            $messageGroup->setUserTo($userTo);
+         //   $messageGroup->setUserTo($userTo);
           //  $message->setMessageGroup($messageGroup);
 
         }
 
         $em = $this->getDoctrine()->getManager();
         $em->persist($message);
-        $em->persist($messageGroup);
+       // $em->persist($messageGroup);
         $em->flush();
 
 
@@ -174,8 +177,80 @@ class DefaultController extends Controller
 
 
 
+        /*
+        $currentTime = date("Y-m-d H:i:s", (time() - 60)); //current time - 1 minute
+        $serializer = $this->get('jms_serializer');
+        $em = $this->getDoctrine()->getManager();
+        $user = $em
+            ->getRepository('AppBundle:User')
+            ->createQueryBuilder('e')
+            ->where('e.id = 17')
+            ->where('e.online > :currentDate')
+            ->setParameter('currentDate', $currentTime)
+            ->getQuery()
+            ->getResult();
 
-        
+        $t = $serializer->serialize($user, 'json');
+        $resultArray = json_decode($t, true);
+        echo '<pre>';
+        print_r($resultArray);
+        echo '</pre>';
+        die();
+        */
+
+
+        $currentId = $request->query->get('currentUser');
+
+        $currentTime = date("Y-m-d H:i:s", (time() - 60)); //current time - 1 minute
+        $serializer = $this->get('jms_serializer');
+        $em = $this->getDoctrine()->getManager();
+
+
+
+        $qb = $em->createQueryBuilder();
+        $nots = $qb->select('user')
+            ->from('AppBundle:User', 'user')
+            ->where($qb->expr()->eq('user.id',17))
+            ->getQuery()
+            ->getResult();
+        /*
+        echo '<pre>';
+        print_r(json_decode($serializer->serialize($nots,'json'), true));
+        echo '</pre>';
+
+        die();
+        */
+
+
+        /*
+        $user = $em
+            ->getRepository('AppBundle:User')
+            ->createQueryBuilder('e')
+            // ->where('e.id = 17')
+            ->where($qb->expr()->notIn('e.id', [17]))
+            ->andWhere('e.online > :currentDate')
+            ->setParameter('currentDate', $currentTime)
+            ->getQuery()
+            ->getResult();
+        if($user) {
+            //update login user online time
+            $response['body'] = $user;
+            $response['status'] = 200;
+            $response['error'] = [];
+        } else {
+            $response['body'] = [];
+            $response['status'] = 404;
+            $response['error'] = ['User do not exist'];
+        }
+
+
+
+        print_r($serializer->serialize($user,'json'));
+        die();
+        */
+
+
+
 
 
 

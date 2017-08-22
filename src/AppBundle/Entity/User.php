@@ -50,7 +50,7 @@ class User implements  AdvancedUserInterface , \Serializable
      */
     private $username;
     /**
-     * @ORM\Column(type="string", length=64)
+     * @ORM\Column(type="string", length=255)
      * @Assert\NotNull(message="Password error (this is my custom validation message).")
      * @Assert\Length(
      *      min = 2,
@@ -145,6 +145,22 @@ class User implements  AdvancedUserInterface , \Serializable
      *
      */
     public $messageGroupFrom;
+
+    /**
+     * @ORM\Column(type="datetime")
+     * @JMS\Expose
+     */
+    private $online;
+
+    public function setOnline()
+    {
+        $this->online = new \DateTime("now");
+    }
+
+    public function getOnline()
+    {
+        return $this->online;
+    }
     
     
     

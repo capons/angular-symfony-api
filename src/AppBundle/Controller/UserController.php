@@ -36,12 +36,13 @@ class UserController extends Controller
         $user = $em->getRepository('AppBundle:User');
         $allUser = $user->findAll();
         $serializer = $this->get('jms_serializer');
-        $response['body'] = $allUser;//$array;
+
+        $response['body'] = $allUser;
         $response['status'] = true;
         $response['error'] = [];
+
         $res = new Response($serializer->serialize($response,'json'));
         $res->headers->set('Content-Type', 'application/json');
-        $res->headers->set('Access-Control-Allow-origin','*');
         return $res;
     }
 
@@ -52,14 +53,11 @@ class UserController extends Controller
     public function addUserAction(Request $request)
     {
 
-
-
+        
         //get file from request
         $file = $request->files->get('file');
         $serializer = $this->get('jms_serializer');
-
-
-
+        
         //validate file
         $image = new Image();
         $image->setFile($file);
@@ -147,6 +145,7 @@ class UserController extends Controller
         $user->setPassword($pwd);
         $user->setUsername($formData['name']);
         $user->setEmail($formData['email']);
+        $user->setOnline();
 
         //set user relation
         $user->setAddress($address);
@@ -173,6 +172,7 @@ class UserController extends Controller
         $response['body'] = $array;
         $response['status'] = true;
         $response['error'] = [];
+
 
         return new Response($serializer->serialize($response,'json'));
         die();
@@ -220,9 +220,13 @@ class UserController extends Controller
         $pwd=$encoder->encodePassword($user, $formData['password']);
         $repository = $this->getDoctrine()->getRepository('AppBundle:User');
         $user = $repository->findOneBy(
-            array('email' => $formData['email'], 'password' => $pwd) 
+            ['email' => $formData['email'], 'password' => $pwd]
         );
         if($user) {
+            //update login user online time
+            $user->setOnline();
+            $em->flush();
+
             $response['body'] = $serializer->toArray($user);
             $response['status'] = true;
             $response['error'] = [];
@@ -231,6 +235,87 @@ class UserController extends Controller
             $response['status'] = false;
             $response['error'] = ['User do not exist'];
         }
-        return new Response($serializer->serialize($response,'json'));
+        $res = new Response($serializer->serialize($response,'json'));
+      //  $res->headers->set('Content-Type', 'application/json');
+        return $res;
+    }
+
+    /**
+     * @Route("/online/update", name="userOnline")
+     * @Method({"POST"})
+     */
+    public function updateOnlineStatus(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $serializer = $this->get('jms_serializer');
+        $params = array();
+        $content =$request->getContent();
+        if (!empty($content))
+        {
+            $params = json_decode($content, true); // 2nd param to get as array
+        }
+        $repository = $this->getDoctrine()->getRepository('AppBundle:User');
+        $user = $repository->find($params['currentUser']);
+        if($user) {
+            //update login user online time
+            $user->setOnline();
+            $em->flush();
+            $response['message'] = ['User online status update successfully'];
+            $response['status'] = 200;
+            $response['error'] = [];
+        } else {
+            $response['message'] = [];
+            $response['status'] = 404;
+            $response['error'] = ['User do not exist'];
+        }
+        $res = new Response($serializer->serialize($response,'json'), $response['status']);
+        return $res;
+    }
+
+    /**
+     * @Route("/online/user", name="getUserOnline")
+     * @Method({"GET"})
+     */
+    public function getOnlineUser(Request $request)
+    {
+
+        $currentId = $request->query->get('currentUser');
+
+        $currentTime = date("Y-m-d H:i:s", (time() - 60)); //current time - 1 minute
+        $serializer = $this->get('jms_serializer');
+        $em = $this->getDoctrine()->getManager();
+        
+        
+        /*
+
+        $nots = $qb->select('user')
+            ->from('$AppBundle:User', 'user')
+            ->where($qb->expr()->eq('user.id',17))
+            ->getQuery()
+            ->getResult();
+        */
+
+        $qb = $em->createQueryBuilder();
+
+        $user = $em
+            ->getRepository('AppBundle:User')
+            ->createQueryBuilder('e')
+           // ->where($qb->expr()->notIn('e.id', [(int)$currentId]))
+            ->andWhere('e.online > :currentDate')
+            ->setParameter('currentDate', $currentTime)
+            ->getQuery()
+            ->getResult();
+        if($user) {
+            //update login user online time
+            $response['body'] = $user;
+            $response['status'] = 200;
+            $response['error'] = [];
+        } else {
+            $response['body'] = [];
+            $response['status'] = 404;
+            $response['error'] = ['User do not exist'];
+        }
+        $res = new Response($serializer->serialize($response,'json'), $response['status']);
+        return $res;
     }
 }
