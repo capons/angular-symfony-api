@@ -278,25 +278,12 @@ class UserController extends Controller
      */
     public function getOnlineUser(Request $request)
     {
-
         $currentId = $request->query->get('currentUser');
-
         $currentTime = date("Y-m-d H:i:s", (time() - 60)); //current time - 1 minute
         $serializer = $this->get('jms_serializer');
         $em = $this->getDoctrine()->getManager();
         
-        
-        /*
-
-        $nots = $qb->select('user')
-            ->from('$AppBundle:User', 'user')
-            ->where($qb->expr()->eq('user.id',17))
-            ->getQuery()
-            ->getResult();
-        */
-
         $qb = $em->createQueryBuilder();
-
         $user = $em
             ->getRepository('AppBundle:User')
             ->createQueryBuilder('e')
