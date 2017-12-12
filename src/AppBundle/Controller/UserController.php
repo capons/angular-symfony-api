@@ -236,7 +236,6 @@ class UserController extends Controller
             $response['error'] = ['User do not exist'];
         }
         $res = new Response($serializer->serialize($response,'json'));
-      //  $res->headers->set('Content-Type', 'application/json');
         return $res;
     }
 
@@ -287,7 +286,7 @@ class UserController extends Controller
         $user = $em
             ->getRepository('AppBundle:User')
             ->createQueryBuilder('e')
-           // ->where($qb->expr()->notIn('e.id', [(int)$currentId]))
+           //\ ->where($qb->expr()->notIn('e.id', [(int)$currentId]))
             ->andWhere('e.online > :currentDate')
             ->setParameter('currentDate', $currentTime)
             ->getQuery()
@@ -303,6 +302,44 @@ class UserController extends Controller
             $response['error'] = ['User do not exist'];
         }
         $res = new Response($serializer->serialize($response,'json'), $response['status']);
+        return $res;
+    }
+
+    //check authentication
+    /**
+     * @Route("login/confirm", name="login_confirm")
+     * @Method({"POST"})
+     */
+    public function loginConfirmAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $serializer = $this->get('jms_serializer');
+        $formData = $request->request->all();
+
+
+        $em = $this->getDoctrine()->getManager();
+
+        $qb = $em->createQueryBuilder();
+        $user = $em
+            ->getRepository('AppBundle:User')
+            ->createQueryBuilder('e')
+            ->where('e.isActive = :active')
+            ->setParameter('active',1)
+            ->andWhere('e.email = :emaill')
+            ->setParameter('emaill', $formData['email'])
+            ->getQuery()
+            ->getResult();
+
+
+        if($user) {
+
+            $response['status'] = true;
+            $response['error'] = [];
+        } else {
+            $response['status'] = false;
+            $response['error'] = ['User do not exist'];
+        }
+        $res = new Response($serializer->serialize($response,'json'));
         return $res;
     }
 }

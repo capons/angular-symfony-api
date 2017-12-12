@@ -19,6 +19,10 @@ services:
          class: AppBundle\Service\FileUploader
          arguments: ['%upload_path%'] #argument from config/parameter
 
+    app.add_chat_message:
+         class: AppBundle\Service\ChatMessage
+         arguments: ['@doctrine.orm.entity_manager']
+
     #cors response
     joiz_public_api_token.cors.listener:
             class: AppBundle\EventListener\ApiCors

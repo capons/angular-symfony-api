@@ -21,7 +21,6 @@ class ChatController extends Controller
      */
     public function indexAction(Request $request)
     {
-        // $formData = $request->request->all();
         $to = 23;
         $from = 17;
         $messageGroupRepository = $this->getDoctrine()->getRepository(MessageGroup::class);
@@ -50,13 +49,11 @@ class ChatController extends Controller
             $resultArray = json_decode($t, true);
         }
         */
-        $em = $this->getDoctrine()->getManager();
-        $chatPublicMessageEntity = $em
-            ->getRepository('AppBundle:Message')
-            ->createQueryBuilder('e')
-            ->where('e.messageGroup is null')
-            ->getQuery()
-            ->getResult();
+        //get existing chat message
+        $existMessage = $request->query->get('existIds');
+        $chatMessage = $this->get('app.add_chat_message');
+        $chatPublicMessageEntity = $chatMessage->updateChatMessage($existMessage);
+
         $serializer = $this->get('jms_serializer');
         if($chatPublicMessageEntity) {
             $chatMessageJson = $serializer->serialize($chatPublicMessageEntity, 'json');
@@ -67,10 +64,8 @@ class ChatController extends Controller
         } else {
             $response['body'] = [];
             $response['error'] = [];
-            return new Response($serializer->serialize($response,'json'), 404);
+            return new Response($serializer->serialize($response,'json'), 200);
         }
-
-        die();
     }
 
     /**
