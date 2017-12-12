@@ -91,6 +91,7 @@ class ChatController extends Controller
         $from = 17;
         $userMessage = $params['message'];
         //select group
+        //check if user have private message group
         $messageGroup = $qb->select  ('m')
             ->from    ('AppBundle\Entity\MessageGroup', 'f')
             ->where   ('m.userFrom = :to and m.userTo = :from')
