@@ -16,54 +16,33 @@ class ChatController extends Controller
 {
 
     /**
+     * update chat box
      * @Route("/chat", name="chat")
      * @Method({"GET"})
      */
     public function indexAction(Request $request)
     {
-        $to = 23;
-        $from = 17;
-        $messageGroupRepository = $this->getDoctrine()->getRepository(MessageGroup::class);
-        $qb =$messageGroupRepository->createQueryBuilder('m');
-        //select private message
-        /*
-        $mGroup = $qb->select  ('m')
-            ->from    ('AppBundle\Entity\MessageGroup', 'd')
-            ->where   ('m.userFrom = :to and m.userTo = :from')
-            ->orWhere('m.userFrom = :from and m.userTo = :to')
-            ->setParameters(['to' => $to, 'from' => $from])
-            ->getQuery()
-            ->getOneOrNullResult();
-        if($mGroup) {
-            //select private message
-            $em = $this->getDoctrine()->getManager();
-            $entity = $em
-                ->getRepository('AppBundle:Message')
-                ->createQueryBuilder('e')
-                ->where('e.messageGroup = :groupId')
-                ->setParameter('groupId', $mGroup->getId())
-                ->getQuery()
-                ->getResult();
-            $serializer = $this->get('jms_serializer');
-            $t = $serializer->serialize($entity, 'json');
-            $resultArray = json_decode($t, true);
-        }
-        */
+        $to = 18;
+        $from = 17; //current user;
         //get existing chat message
         $existMessage = $request->query->get('existIds');
         $chatMessage = $this->get('app.add_chat_message');
         $chatPublicMessageEntity = $chatMessage->updateChatMessage($existMessage);
-
+        $chatPrivateMessage = $chatMessage->getPrivateUsers($to, $from);
         $serializer = $this->get('jms_serializer');
         if($chatPublicMessageEntity) {
             $chatMessageJson = $serializer->serialize($chatPublicMessageEntity, 'json');
+            $privateMessageJson = $serializer->serialize($chatPrivateMessage, 'json');
             $message = json_decode($chatMessageJson, true);
+            $privateMessage = json_decode($privateMessageJson, true);
             $response['body'] = $message;
+            $response['privateMessage'] = $privateMessage;
             $response['error'] = [];
             return new Response($serializer->serialize($response,'json'), 200);
         } else {
             $response['body'] = [];
             $response['error'] = [];
+            $response['privateMessage'] = [];
             return new Response($serializer->serialize($response,'json'), 200);
         }
     }
@@ -87,39 +66,54 @@ class ChatController extends Controller
         //add chat private message
         $messageGroupRepository = $this->getDoctrine()->getRepository(MessageGroup::class);
         $qb =$messageGroupRepository->createQueryBuilder('m');
-        $to = 23;
-        $from = 17;
+        $from = 17; //current user;
+        $to = '';//18;
         $userMessage = $params['message'];
         //select group
-        //check if user have private message group
-        $messageGroup = $qb->select  ('m')
-            ->from    ('AppBundle\Entity\MessageGroup', 'f')
-            ->where   ('m.userFrom = :to and m.userTo = :from')
-            ->orWhere('m.userFrom = :from and m.userTo = :to')
-            ->setParameters(['to' => $to, 'from' => $from])
-            ->getQuery()
-            ->getOneOrNullResult();
-
-
-        if($messageGroup) {
-            $userRepository = $this->getDoctrine()->getRepository(User::class);
-            $user = $userRepository->find($from);
-            $userTo = $userRepository->find($to);
-            $message = new Message();
-            $message->setMessage($userMessage);
-            $message->setUser($user);
-            $message->setTime();
         
+        if(!empty($to)) {
+            //check if user have private message group
+            $messageGroup = $qb->select  ('m')
+                ->from    ('AppBundle\Entity\MessageGroup', 'f')
+                ->where   ('m.userFrom = :to and m.userTo = :from')
+                ->orWhere('m.userFrom = :from and m.userTo = :to')
+                ->setParameters(['to' => $to, 'from' => $from])
+                ->getQuery()
+                ->getOneOrNullResult();
+            if ($messageGroup) {
 
-            $messageGroup->setUserFrom($user);
-            $messageGroup->setUserTo($userTo);
-            $message->setMessageGroup($messageGroup);
+                $userRepository = $this->getDoctrine()->getRepository(User::class);
+                $user = $userRepository->find($from);
+                $message = new Message();
+                $message->setMessage($userMessage);
+                $message->setUser($user);
+                $message->setTime();
+                $message->setMessageGroup($messageGroup);
+                //$userTo = $userRepository->find($from);
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($message);
+                $em->flush();
+            } else {
 
+                $userRepository = $this->getDoctrine()->getRepository(User::class);
+                $user = $userRepository->find($from);
+                $userTo = $userRepository->find($to);
+                $message = new Message();
+                $message->setMessage($userMessage);
+                $message->setUser($user);
+                $message->setTime();
 
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($message);
-            $em->persist($messageGroup);
-            $em->flush();
+                $messageGroup = new MessageGroup();
+                $messageGroup->setUserFrom($user);
+                $messageGroup->setUserTo($userTo);
+                $message->setMessageGroup($messageGroup);
+                
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($message);
+                $em->persist($messageGroup);
+                $em->flush();
+                
+            }
         } else {
             $userRepository = $this->getDoctrine()->getRepository(User::class);
             $user = $userRepository->find($from);

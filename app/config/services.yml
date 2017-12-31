@@ -21,7 +21,7 @@ services:
 
     app.add_chat_message:
          class: AppBundle\Service\ChatMessage
-         arguments: ['@doctrine.orm.entity_manager']
+         arguments: ['@doctrine.orm.entity_manager', '@jms_serializer']
 
     #cors response
     joiz_public_api_token.cors.listener:
